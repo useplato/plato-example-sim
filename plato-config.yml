@@ -1,0 +1,38 @@
+datasets:
+  base: &base
+    compute: &base_compute
+      cpus: 1
+      memory: 2048
+      disk: 10240
+      app_port: 80
+      plato_messaging_port: 7000
+    metadata: &base_metadata
+      name: {{{ simulator_name }}}
+      description: {{{ simulator_description }}}
+      source_code_url: {{{ simulator_source_code_url }}}
+      start_url: blank
+      license: {{{ simulator_license }}}
+      variables:
+        - name: username
+          value: admin
+        - name: password
+          value: password
+        - name: wrong_password
+          value: wrongpassword
+      flows_path: blank
+    services: &base_services
+      main_app:
+        type: docker-compose
+        file: base/docker-compose.yml
+        healthy_wait_timeout: 600
+        required_healthy_containers:
+        - {{{container_name}}}
+    listeners: &base_listeners
+      db:
+        type: db
+        db_type: postgresql
+        db_host: 127.0.0.1
+        db_port: 5432
+        db_user: user
+        db_password: password
+        db_database: mydb

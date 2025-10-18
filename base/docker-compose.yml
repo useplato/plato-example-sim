@@ -1,0 +1,107 @@
+version: '3.8'
+
+# NETWORKING CONFIGURATION GUIDE:
+# ================================
+#
+# FOR PLATO PRODUCTION NODES (Linux):
+# - Use `network_mode: host` for all services
+# - Remove all `ports:` mappings
+# - Services communicate directly via localhost:PORT
+# - Health checks use 127.0.0.1:PORT
+# - Nginx upstream uses 127.0.0.1:8080
+#
+# FOR MAC DEVELOPMENT:
+# - Comment out `network_mode: host` lines
+# - Add explicit `ports:` mappings (e.g., "80:80", "8080:8080", "5432:5432")
+# - Services communicate via container names (e.g., test-app:8080)
+# - Health checks use localhost:PORT
+# - Nginx upstream uses container name:port (test-app:8080)
+#
+# DOCKER BRIDGE NETWORKING:
+# - Default Docker networking creates an isolated bridge network
+# - Each service gets its own IP address within the bridge
+# - Services discover each other by container/service name
+# - Port mappings expose container ports to host
+# - More secure and isolated than host networking
+#
+# TO SWITCH TO PRODUCTION MODE:
+# 1. Uncomment all `network_mode: host` lines
+# 2. Comment out all `ports:` sections
+# 3. Update nginx.conf upstream to use 127.0.0.1:8080
+# 4. Update health checks to use 127.0.0.1:PORT
+
+services:
+
+  # PostgreSQL Database
+  db:
+    image: postgres:latest
+    #network_mode: host                    # PRODUCTION: Uncomment for Plato nodes
+    ports:
+      - 5432:5432 # MAC: Comment out for production
+    extra_hosts:
+      - localhost:127.0.0.1
+    container_name: db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_DB: mydb
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U user -d mydb
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+
+  # Static HTML Test App
+  test-app:
+    build: ./static-app
+    #network_mode: host                    # PRODUCTION: Uncomment for Plato nodes
+    ports:
+      - 8080:8080 # MAC: Comment out for production
+    extra_hosts:
+      - localhost:127.0.0.1
+    container_name: test-app
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl -f http://localhost:8080/health || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:latest
+    #network_mode: host                    # PRODUCTION: Uncomment for Plato nodes
+    ports:
+      - 80:80 # MAC: Comment out for production
+    extra_hosts:
+      - localhost:127.0.0.1
+    container_name: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro # NOTE: Update upstream in nginx.conf when switching modes
+      - ./nginx/html:/usr/share/nginx/html:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl -f http://localhost:80/health || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      test-app:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+
+
