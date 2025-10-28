@@ -37,3 +37,5 @@ datasets:
         db_user: user
         db_password: password
         db_database: mydb
+          volumes:
+          - /home/plato/db_signals:/tmp/postgres-signals
