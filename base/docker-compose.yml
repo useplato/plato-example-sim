@@ -34,7 +34,7 @@ services:
 
   # for mysql/mariadb
    # db:
-   #  image: 383806609161.dkr.ecr.us-west-1.amazonaws.com/app-sim/mariadb-10.6:prod-latest
+   #  image: public.ecr.aws/i3q4i1d7/app-sim/mariadb-11:prod-latest
    #  network_mode: host                    # PRODUCTION: Uncomment for Plato nodes
    #  ports:
    #    - 3306:3306                          # MAC: Comment out for production
@@ -55,7 +55,7 @@ services:
 
   # for postgres:
   db:
-    image: 383806609161.dkr.ecr.us-west-1.amazonaws.com/app-sim/postgres-17-alpine:prod-latest
+    image: public.ecr.aws/i3q4i1d7/app-sim/postgres-17-alpine:prod-latest
     network_mode: host
     environment:
       POSTGRES_USER: bugsink
