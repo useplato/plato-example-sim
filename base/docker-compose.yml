@@ -32,29 +32,44 @@ version: '3.8'
 
 services:
 
-  # PostgreSQL Database
+  # for mysql/mariadb
+   # db:
+   #  image: 383806609161.dkr.ecr.us-west-1.amazonaws.com/app-sim/mariadb-10.6:prod-latest
+   #  network_mode: host                    # PRODUCTION: Uncomment for Plato nodes
+   #  ports:
+   #    - 3306:3306                          # MAC: Comment out for production
+   #  container_name: tastyigniter-db
+   #  environment:
+   #    MYSQL_DATABASE: tastyigniter
+   #    MYSQL_USER: tastyigniter
+   #    MYSQL_PASSWORD: tastyigniter_password
+   #    MYSQL_ROOT_PASSWORD: root_password
+   #  volumes:
+   #    - /home/plato/db_signals:/tmp/mysql-signals
+   #  healthcheck:
+   #    test: [ "CMD-SHELL", "ls -la /tmp/mysql-signals/ && test -f /tmp/mysql-signals/mysql.healthy && echo 'Health check passed'" ]
+   #    interval: 10s
+   #    timeout: 5s
+   #    retries: 3
+   #    start_period: 20s
+
+  # for postgres:
   db:
-    image: postgres:latest
-    #network_mode: host                    # PRODUCTION: Uncomment for Plato nodes
-    ports:
-      - 5432:5432 # MAC: Comment out for production
-    extra_hosts:
-      - localhost:127.0.0.1
-    container_name: db
+    image: 383806609161.dkr.ecr.us-west-1.amazonaws.com/app-sim/postgres-17-alpine:prod-latest
+    network_mode: host
     environment:
-      POSTGRES_USER: user
-      POSTGRES_DB: mydb
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: bugsink
+      POSTGRES_DB: bugsink
+      POSTGRES_PASSWORD: bugsink_password
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - /home/plato/db_signals:/tmp/postgres-signals
     healthcheck:
-      test:
-        - CMD-SHELL
-        - pg_isready -U user -d mydb
-      interval: 30s
+      test: [ "CMD-SHELL", "ls -la /tmp/postgres-signals/ && test -f /tmp/postgres-signals/pg.healthy && echo 'Health check passed'" ]
+      interval: 10s
       timeout: 5s
-      retries: 3
-      start_period: 60s
+      retries: 5
+      start_period: 30s
+
 
   # Static HTML Test App
   test-app:
