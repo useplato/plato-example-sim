@@ -1,3 +1,4 @@
+service: {{{serice_name}}}
 datasets:
   base: &base
     compute: &base_compute
