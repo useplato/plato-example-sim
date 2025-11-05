@@ -39,3 +39,7 @@ datasets:
         db_database: mydb
           volumes:
           - /home/plato/db_signals:/tmp/postgres-signals
+        audit_ignore_tables:
+          - audit_log
+          - table: users
+            columns: [lastlogin, updateat]
